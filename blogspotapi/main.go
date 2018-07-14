@@ -26,14 +26,15 @@ func getBlogPosts(w http.ResponseWriter, req *http.Request) {
 	var posts []Post
 
 	//select all rows from database with query command and store
-	rows, _ := db.Query("Select post_id, title, body FROM blog")
+	var err error
+	rows, err := db.Query("Select post_id, title, body FROM posts")
 
 	//iterate through rows, and append each to posts array to be returned later
 	var tempPost Post
 
 	//perhaps rows are empty
-	if rows == nil {
-		log.Fatal("Error, could not retrieve any rows from database")
+	if err != nil {
+		log.Fatal("Error, could not retrieve any rows from database - ", err)
 	}
 
 	for rows.Next() {
@@ -45,7 +46,17 @@ func getBlogPosts(w http.ResponseWriter, req *http.Request) {
 }
 
 func createBlogPost(w http.ResponseWriter, req *http.Request) {
+	//create a post variable, and store body of http req in it
+	var tempPost Post
+	_ = json.NewDecoder(req.Body).Decode(&tempPost)
 
+	//sql query to store new blog post
+	statement, err := db.Prepare("INSERT INTO posts (title, body) VALUES (?, ?)")
+	statement.Exec(tempPost.title, tempPost.body)
+
+	if err != nil {
+		log.Fatal("Error, could not insert post - ", err)
+	}
 }
 
 func main() {
