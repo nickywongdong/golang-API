@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -38,7 +39,11 @@ func getBlogPosts(w http.ResponseWriter, req *http.Request) {
 	}
 
 	for rows.Next() {
-		rows.Scan(tempPost.post_id, tempPost.title, tempPost.body)
+		rows.Scan(&tempPost.post_id, &tempPost.title, &tempPost.body)
+		fmt.Printf("%s", tempPost.post_id)
+		fmt.Printf("%s", tempPost.title)
+		fmt.Printf("%s", tempPost.body)
+
 		posts = append(posts, tempPost)
 	}
 
