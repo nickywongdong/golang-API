@@ -60,11 +60,10 @@ func createBlogPost(w http.ResponseWriter, req *http.Request) {
 
 	err = json.NewDecoder(req.Body).Decode(&tempPost)
 
-	log.Printf("%s\n", tempPost.title+tempPost.body)
-
 	if err != nil {
 		log.Fatal("Error, could not save body of request - ", err)
 	}
+
 	//sql query to store new blog post
 	statement, err := db.Prepare("INSERT INTO posts (title, body) VALUES (?, ?)")
 	statement.Exec(tempPost.title, tempPost.body)
