@@ -21,7 +21,9 @@ type Post struct {
 //create global database variable to reference in endpoint functions
 var db *sql.DB
 
-//API endpont which gets all blog posts within the database
+/*
+ * Route to display all blog posts within the database
+ */
 func getBlogPosts(w http.ResponseWriter, req *http.Request) {
 	//create array which holds results:
 	var posts []Post
@@ -40,21 +42,29 @@ func getBlogPosts(w http.ResponseWriter, req *http.Request) {
 
 	for rows.Next() {
 		rows.Scan(&tempPost.post_id, &tempPost.title, &tempPost.body)
-		fmt.Printf("%s", tempPost.post_id)
-		fmt.Printf("%s", tempPost.title)
-		fmt.Printf("%s", tempPost.body)
-
 		posts = append(posts, tempPost)
 	}
+
+	fmt.Printf("%s\n", posts[0].title+posts[0].body)
 
 	json.NewEncoder(w).Encode(posts)
 }
 
+/*
+ * Route to create a blog post
+ */
 func createBlogPost(w http.ResponseWriter, req *http.Request) {
 	//create a post variable, and store body of http req in it
 	var tempPost Post
-	_ = json.NewDecoder(req.Body).Decode(&tempPost)
+	var err error
 
+	err = json.NewDecoder(req.Body).Decode(&tempPost)
+
+	log.Printf("%s\n", tempPost.title+tempPost.body)
+
+	if err != nil {
+		log.Fatal("Error, could not save body of request - ", err)
+	}
 	//sql query to store new blog post
 	statement, err := db.Prepare("INSERT INTO posts (title, body) VALUES (?, ?)")
 	statement.Exec(tempPost.title, tempPost.body)
