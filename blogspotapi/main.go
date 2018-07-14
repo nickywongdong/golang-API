@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 //define a structure which all blog posts will need to adhere to:
@@ -29,8 +30,14 @@ func getBlogPosts(w http.ResponseWriter, req *http.Request) {
 
 	//iterate through rows, and append each to posts array to be returned later
 	var tempPost Post
+
+	//perhaps rows are empty
+	if rows == nil {
+		log.Fatal("Error, could not retrieve any rows from database")
+	}
+
 	for rows.Next() {
-		rows.Scan(&tempPost.post_id, &tempPost.title, &tempPost.body)
+		rows.Scan(tempPost.post_id, tempPost.title, tempPost.body)
 		posts = append(posts, tempPost)
 	}
 
@@ -48,8 +55,9 @@ func main() {
 	//open and use database blog.db file through sqlite3
 	var err error
 	db, err = sql.Open("sqlite3", "./blog.db")
+
 	if err != nil {
-		log.Fatal()
+		log.Fatal("Error, could not open database - ", err)
 	}
 
 	//reference functions as endpoints
