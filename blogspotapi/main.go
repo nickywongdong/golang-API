@@ -1,3 +1,12 @@
+/*
+ * Implementation of  Blog Post API Assignment by NWEA
+ * Author: Nicholas Wong
+ * Date: July 14, 2018
+ * Description: Simple API assignemnt of a blog with two endpoints. My first time writting an application
+ * 		in Golang, so the format may not adhere to standards. Also not sure exactly how to log errors correctly,
+ * 		perhaps log.Fatal isn't suitable in certain situations.
+ */
+
 package main
 
 import (
