@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -13,9 +12,9 @@ import (
 
 //define a structure which all blog posts will need to adhere to:
 type Post struct {
-	post_id string `json:"post_id"`
-	title   string `json:"title"`
-	body    string `json:"body"`
+	Post_id int    `json:"post_id"`
+	Title   string `json:"title"`
+	Body    string `json:"body"`
 }
 
 //create global database variable to reference in endpoint functions
@@ -31,21 +30,18 @@ func getBlogPosts(w http.ResponseWriter, req *http.Request) {
 	//select all rows from database with query command and store
 	var err error
 	rows, err := db.Query("Select post_id, title, body FROM posts")
-
-	//iterate through rows, and append each to posts array to be returned later
-	var tempPost Post
-
-	//perhaps rows are empty
-	if err != nil {
+	if err != nil { //perhaps rows are empty
 		log.Fatal("Error, could not retrieve any rows from database - ", err)
 	}
 
+	//iterate through rows, and append each to posts to an array to be returned later
+	var tempPost Post
 	for rows.Next() {
-		rows.Scan(&tempPost.post_id, &tempPost.title, &tempPost.body)
+		rows.Scan(&tempPost.Post_id, &tempPost.Title, &tempPost.Body)
 		posts = append(posts, tempPost)
 	}
 
-	fmt.Printf("%s\n", posts[0].title+posts[0].body)
+	rows.Close()
 
 	json.NewEncoder(w).Encode(posts)
 }
@@ -66,10 +62,12 @@ func createBlogPost(w http.ResponseWriter, req *http.Request) {
 
 	//sql query to store new blog post
 	statement, err := db.Prepare("INSERT INTO posts (title, body) VALUES (?, ?)")
-	statement.Exec(tempPost.title, tempPost.body)
+	statement.Exec(tempPost.Title, tempPost.Body)
 
 	if err != nil {
 		log.Fatal("Error, could not insert post - ", err)
+	} else {
+		json.NewEncoder(w).Encode("Blog post successfully posted!")
 	}
 }
 
@@ -90,4 +88,6 @@ func main() {
 	router.HandleFunc("/post", createBlogPost).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8000", router))
+
+	db.Close()
 }
